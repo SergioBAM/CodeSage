@@ -1,4 +1,17 @@
+using CodeSage.Api.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("Default"),
+        o => o.UseVector()
+    );
+});
+
+
 var app = builder.Build();
 
 app.MapGet("/health", () =>
