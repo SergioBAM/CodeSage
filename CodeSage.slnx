@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="CodeSage.Api/CodeSage.Api.csproj" />
+  <Project Path="CodeSage.Core/CodeSage.Core.csproj" />
+  <Project Path="CodeSage.Ingestion/CodeSage.Ingestion.csproj" />
+  <Project Path="CodeSage.Tests/CodeSage.Tests.csproj" />
+</Solution>
