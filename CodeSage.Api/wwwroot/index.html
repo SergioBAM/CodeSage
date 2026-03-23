@@ -223,6 +223,11 @@
 
         function appendThinking(question) {
             removeEmptyState();
+
+            // remove any stale #thinking element before adding a new one
+            const stale = document.getElementById('thinking');
+            if (stale) stale.remove();
+
             messages.insertAdjacentHTML('beforeend', `
             <div class="bubble-row">
                 <div class="avatar user">U</div>
@@ -245,16 +250,17 @@
             input.value = '';
             btn.disabled = true;
 
-            // retarget htmx now that #thinking exists in the DOM
-            htmx.ajax('POST', '/ui/query',  {
+            htmx.ajax('POST', '/ui/query', {
             target: '#thinking',
             swap: 'outerHTML',
             values: { question: question }
-            }).then(function () {
+            });
+        });
+
+        document.body.addEventListener('htmx:afterSwap', function () {
             btn.disabled = false;
             input.focus();
             scrollBottom();
-            });
         });
 
         input.addEventListener('keydown', function (e) {
