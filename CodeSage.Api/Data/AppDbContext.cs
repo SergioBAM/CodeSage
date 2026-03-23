@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Pgvector.EntityFrameworkCore;
 
 namespace CodeSage.Api.Data;
 
