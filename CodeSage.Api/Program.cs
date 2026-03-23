@@ -1,4 +1,5 @@
 using CodeSage.Api.Data;
+using CodeSage.Api.Services;
 using CodeSage.Core.Embedding;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +20,8 @@ builder.Services.AddOllamaEmbeddingGenerator(
     endpoint: new Uri(ollamaEndpoint)
 );
 
+builder.Services.AddHttpClient<OllamaChatService>();
+
 builder.Services.AddScoped<IEmbeddingService, SemanticKernelEmbeddingService>();
 builder.Services.AddScoped<RagQueryService>();
 
@@ -30,7 +33,7 @@ app.MapGet("/health", () =>
     return Results.Ok(new { status = "gumba!"});
 });
 
-app.MapPost("/query", async (QueryRequest request, RagQueryService rag) =>
+app.MapPost("/query", async (QueryRequest request, RagQueryService rag, OllamaChatService chat) =>
 {
     if (string.IsNullOrWhiteSpace(request.Question))
     {
@@ -38,15 +41,16 @@ app.MapPost("/query", async (QueryRequest request, RagQueryService rag) =>
     }
 
     var chunks = await rag.FindRelevantChunksAsync(request.Question);
+    var answer = await chat.AskAsync(request.Question, chunks.Select(c => c.Content));
 
     return Results.Ok(new
     {
        question = request.Question,
-       chunks = chunks.Select(c => new
+       answer,
+       sources = chunks.Select(c => new
        {
            c.FilePath,
-           c.ChunkIndex,
-           c.Content
+           c.ChunkIndex           
        }) 
     });
 });
