@@ -16,8 +16,8 @@ public sealed class AppDbContext : DbContext
         modelBuilder.Entity<CodeChunkEntity>(e =>
         {
             e.HasKey(x => x.Id);
-            // matches OpenAI's text-embedding-ada-002 dimensions.
-            e.Property(x => x.Embedding).HasColumnType("vector(1536)");
+            // matches nomic-embed-text dimensions.
+            e.Property(x => x.Embedding).HasColumnType("vector(768)");
             e.HasIndex(x => x.FilePath);
         });
     }

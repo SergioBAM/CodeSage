@@ -1,4 +1,5 @@
 using CodeSage.Api.Data;
+using CodeSage.Core.Embedding;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     );
 });
 
+var ollamaEndpoint = builder.Configuration["Ollama:Endpoint"] ?? "http://localhost:11434";
+
+builder.Services.AddOllamaEmbeddingGenerator(
+    modelId: "nomic-embed-text",
+    endpoint: new Uri(ollamaEndpoint)
+);
+
+builder.Services.AddScoped<IEmbeddingService, SemanticKernelEmbeddingService>();
 
 var app = builder.Build();
 
