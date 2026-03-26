@@ -22,7 +22,10 @@ builder.Services.AddOllamaEmbeddingGenerator(
 );
 
 builder.Services.AddAntiforgery();
-builder.Services.AddHttpClient<OllamaChatService>();
+builder.Services.AddHttpClient<OllamaChatService>(client =>
+{
+    client.Timeout = TimeSpan.FromMinutes(3);
+});
 
 builder.Services.AddScoped<IEmbeddingService, SemanticKernelEmbeddingService>();
 builder.Services.AddScoped<RagQueryService>();

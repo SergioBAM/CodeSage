@@ -7,7 +7,7 @@ public sealed class RagQueryService
 {
     private readonly AppDbContext _db;
     private readonly IEmbeddingService _embedding;
-    private readonly int _topK;
+    public int TopK {get; init; } = 5;
     public RagQueryService(
         AppDbContext db,
         IEmbeddingService embedding,
@@ -15,7 +15,7 @@ public sealed class RagQueryService
     {
         _db = db;
         _embedding = embedding;
-        _topK = config.GetValue<int>("Rag:TopK", 5);
+        TopK = config.GetValue<int>("Rag:TopK", 5);
     }
 
     public async Task<IReadOnlyList<CodeChunkEntity>> FindRelevantChunksAsync(
@@ -27,7 +27,7 @@ public sealed class RagQueryService
 
         return await _db.CodeChunks
             .OrderBy(c => c.Embedding!.L2Distance(vector))
-            .Take(_topK)
+            .Take(TopK)
             .ToListAsync(cancellationToken);
-    }
+    }    
 }

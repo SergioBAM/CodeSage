@@ -7,6 +7,8 @@ using Microsoft.SemanticKernel;
 using Pgvector;
 using Microsoft.Extensions.AI;
 
+// running our ingestion updates our db with content.
+
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((ctx, services) =>
     {
@@ -25,9 +27,12 @@ var host = Host.CreateDefaultBuilder(args)
     .Build();
 
 var db = host.Services.GetRequiredService<AppDbContext>();
-var chunker = host.Services.GetRequiredService<ITextChunker>();
+
 var embeddingService = host.Services
     .GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>();
+
+var slidingChunker = new SlidingWindowChunker();
+var roslynChunker = new RoslynCodeChunker();
 
 var targetPath = args.FirstOrDefault() ?? ".";
 Console.WriteLine($"Ingesting from: {Path.GetFullPath(targetPath)}");
@@ -45,7 +50,11 @@ foreach (var file in files)
     var content = await File.ReadAllTextAsync(file);
     if (string.IsNullOrWhiteSpace(content)) continue;
 
-    var chunks = chunker.Chunk(content, chunkSize: 500, overlap: 50);
+    var ext = Path.GetExtension(file);    
+    var chunks = ext == ".cs"
+        ? roslynChunker.ChunkFile(file, content)
+        : slidingChunker.Chunk(content, chunkSize: 500, overlap: 50);
+
     Console.WriteLine($"  {Path.GetFileName(file)} -> {chunks.Count} chunks");
 
     for (var i = 0; i < chunks.Count; i++)
